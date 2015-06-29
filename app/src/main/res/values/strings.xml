@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">News</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="network_error">Network error. Check your Internet connection.</string>
+</resources>
