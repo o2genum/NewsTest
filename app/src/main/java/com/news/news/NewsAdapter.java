@@ -116,7 +116,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
 
     @Override
     public NewsAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
-                                                     int viewType) {
+                                                   int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.news_item, parent, false);
         ViewHolder vh = new ViewHolder(v);
@@ -134,10 +134,23 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
         } else {
             holder.mImageView.setVisibility(View.VISIBLE);
             holder.mImageView.setImageBitmap(null);
-            new GetCachedImageTask().execute(new DownloadOrder(holder.item.enclosure, holder));
+            try {
+                Bitmap image = RssReader.getImage(holder.item.enclosure, RssReader.Source.CACHE);
+                holder.setImage(image, false);
+                holder.mNeedsImageDownload = false;
+            } catch (Exception ex) {
+                holder.mNeedsImageDownload = true;
+            }
         }
         holder.mTitleTextView.setText(holder.item.title.trim());
         holder.mDescriptionTextView.setText(holder.item.description.replaceAll("\n", " ").trim() + " – " + mItems[position].link);
+
+        if (holder.needsImageDownload()) {
+            mOrders.add(new DownloadOrder(holder.getImageDownloadUrl(), holder));
+            while (mOrders.size() > mMaxImageDownloadListLength && mMaxImageDownloadListLength != 0) {
+                mOrders.remove(0).viewHolder.setIsRecyclable(true);
+            }
+        }
     }
 
     public void downloadImages() {
@@ -150,46 +163,10 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
         return mItems.length;
     }
 
-    private class GetCachedImageTask extends AsyncTask<DownloadOrder, Void, FinishedOrder> {
-        @Override
-        protected FinishedOrder doInBackground(DownloadOrder... order) {
-            if (order.length != 1) {
-                throw new IllegalArgumentException("Only one argument allowed");
-            }
-
-            Bitmap image = null;
-            try {
-                image = RssReader.getImage(order[0].url, RssReader.Source.CACHE);
-            } catch (Exception ex) {
-            } finally {
-                if (image != null) {
-                    return new FinishedOrder(order[0], image);
-                }
-            }
-            return new FinishedOrder(order[0], null);
-        }
-
-        @Override
-        protected void onPostExecute(FinishedOrder finishedOrder) {
-            ViewHolder holder = finishedOrder.downloadOrder.viewHolder;
-            if (finishedOrder.image != null) {
-                holder.setImage(finishedOrder.image, false);
-                holder.setIsRecyclable(true);
-            } else {
-                    mOrders.add(new DownloadOrder(holder.getImageDownloadUrl(), holder));
-                    while (mOrders.size() > mMaxImageDownloadListLength && mMaxImageDownloadListLength != 0) {
-                        mOrders.remove(0).viewHolder.setIsRecyclable(true);
-                    }
-            }
-        }
-    }
-
-    private class DownloadImagesTask extends AsyncTask<List<DownloadOrder>, FinishedOrder, Void> {
+    private class DownloadImagesTask extends AsyncTask<List<DownloadOrder>, FinishedOrder,  Void> {
         @Override
         protected Void doInBackground(List<DownloadOrder>... downloadOrders) {
-            if (downloadOrders.length != 1) {
-                throw new IllegalArgumentException("Only one argument allowed");
-            }
+            if (downloadOrders.length != 1) { throw new IllegalArgumentException("Only one argument allowed"); }
 
             for (DownloadOrder order : downloadOrders[0]) {
                 Bitmap image = null;
@@ -207,9 +184,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
 
         @Override
         protected void onProgressUpdate(FinishedOrder... finishedOrder) {
-            if (finishedOrder.length != 1) {
-                throw new IllegalArgumentException("Only one argument allowed");
-            }
+            if (finishedOrder.length != 1) { throw new IllegalArgumentException("Only one argument allowed"); }
 
             finishedOrder[0].downloadOrder.viewHolder.setImage(finishedOrder[0].image, true);
             finishedOrder[0].downloadOrder.viewHolder.setIsRecyclable(true);
