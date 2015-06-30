@@ -31,6 +31,7 @@ public class RssReader {
     private static final String ns = null;
     private static DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
     private static Map<URL, Bitmap> bitmapCache = new HashMap<URL, Bitmap>();
+
     public enum Source {CACHE, NETWORK};
 
     public static List<Item> getFeeds(List<URL> urls, Source from) throws Exception {
@@ -79,7 +80,29 @@ public class RssReader {
     }
 
     private static Bitmap scaleBitmap(Bitmap src) {
-        return Bitmap.createScaledBitmap(src, 60, 60, true);
+        Bitmap cropped = null;
+        if (src.getWidth() != src.getHeight()) {
+            if (src.getWidth() >= src.getHeight()) {
+                cropped = Bitmap.createBitmap(
+                        src,
+                        src.getWidth() / 2 - src.getHeight() / 2,
+                        0,
+                        src.getHeight(),
+                        src.getHeight()
+                );
+            } else {
+                cropped = Bitmap.createBitmap(
+                        src,
+                        0,
+                        src.getHeight() / 2 - src.getWidth() / 2,
+                        src.getWidth(),
+                        src.getWidth()
+                );
+            }
+        } else {
+            cropped = src;
+        }
+        return Bitmap.createScaledBitmap(cropped, 60, 60, true);
     }
 
     private static List<Item> mergeFeeds(List<List<Item>> lists) {
@@ -91,7 +114,7 @@ public class RssReader {
         return res;
     }
 
-    private static List<Item> parse(InputStream is) throws  Exception {
+    private static List<Item> parse(InputStream is) throws Exception {
         List<Item> items = new LinkedList<Item>();
 
         XmlPullParserFactory xmlFactoryObject = XmlPullParserFactory.newInstance();
@@ -155,7 +178,7 @@ public class RssReader {
         return text;
     }
 
-    private static String readText(XmlPullParser parser) throws Exception{
+    private static String readText(XmlPullParser parser) throws Exception {
         String result = null;
         if (parser.next() == XmlPullParser.TEXT) {
             result = parser.getText();

@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -142,8 +143,9 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
                 holder.mNeedsImageDownload = true;
             }
         }
-        holder.mTitleTextView.setText(holder.item.title.trim());
-        holder.mDescriptionTextView.setText(holder.item.description.replaceAll("\n", " ").trim() + " – " + mItems[position].link);
+        holder.mTitleTextView.setText(Html.fromHtml(holder.item.title.trim() + " <small>—&nbsp;" +
+                (holder.item.link.getHost().toString().equals("lenta.ru") ? "Лента.ру" : "Газета.ру") + "</small>"));
+        holder.mDescriptionTextView.setText(Html.fromHtml(holder.item.description.replaceAll("\n", " ").trim()));
 
         if (holder.needsImageDownload()) {
             mOrders.add(new DownloadOrder(holder.getImageDownloadUrl(), holder));

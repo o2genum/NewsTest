@@ -56,7 +56,6 @@ public class ViewExpanderCollapser {
             }
         };
 
-        // 1dp/ms
         a.setDuration(duration);
         v.startAnimation(a);
     }
