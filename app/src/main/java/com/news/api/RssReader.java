@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -29,7 +30,7 @@ import java.util.Map;
 public class RssReader {
 
     private static final String ns = null;
-    private static DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+    private static DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
     private static Map<URL, Bitmap> bitmapCache = new HashMap<URL, Bitmap>();
 
     public enum Source {CACHE, NETWORK};

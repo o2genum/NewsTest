@@ -48,7 +48,7 @@ public class FeedActivity extends AppCompatActivity {
 
         try {
             feedUrls = new ArrayList<URL>();
-            feedUrls.add(new URL("http://lenta.ru/rss"));
+            feedUrls.add(new URL("https://lenta.ru/rss"));
             feedUrls.add(new URL("http://www.gazeta.ru/export/rss/lenta.xml"));
         } catch (Exception ex) {}
 
@@ -148,6 +148,7 @@ public class FeedActivity extends AppCompatActivity {
             try {
                 return RssReader.getFeeds(urls[0], RssReader.Source.NETWORK);
             } catch (Exception ex) {
+                ex.printStackTrace();
                 mException = ex;
             }
             return null;
